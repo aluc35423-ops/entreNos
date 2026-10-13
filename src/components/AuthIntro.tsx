@@ -23,6 +23,7 @@ import Animated, {
 import Svg, { Path } from 'react-native-svg';
 import { COLORS, LOGO_FONT } from '../theme';
 import AuthForm from './AuthForm';
+import { useProfile } from '../context/profile';
 
 const LOGO = 72;
 const SIZE = 260;
@@ -116,6 +117,8 @@ export default function AuthIntro() {
   const insets = useSafeAreaInsets();
 
   const router = useRouter();
+
+  const { update } = useProfile();
 
   const [boxH, setBoxH] = useState(H); // alto real del contenedor
 
@@ -215,7 +218,17 @@ export default function AuthIntro() {
         <AuthForm
           maxHeight={boxH - cardTop - 16 - insets.bottom}
           onLogin={() => router.replace('/home')}
-          onRegister={() => router.replace('/home')}
+          onRegister={(d) => {
+          update({
+            name: String(d.name ?? ''),
+            email: String(d.email ?? ''),
+            height: String(d.height ?? ''),
+            weight: String(d.weight ?? ''),
+            age: String(d.age ?? ''),
+            exercise: (d.exercise as boolean | null) ?? null,
+          });
+          router.replace('/home');
+        }}
         />
       </Animated.View>
     </KeyboardAvoidingView>

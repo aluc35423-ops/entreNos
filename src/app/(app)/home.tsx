@@ -1,20 +1,16 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PressableScale as Pressable } from '../../components/PressableScale';
 import { useSection } from '../../context/section';
+import { PRODUCTS } from '../../data/products';
 import { MONTHS } from '../../utils/dates';
 import { BODY, BODY_BOLD, FONT, LOGO_FONT } from '../../theme';
 import { AvatarButton, shadow } from '../../components/ui';
 
 type IconName = keyof typeof Icon.glyphMap;
 type Action = { key: string; label: string; icon: IconName; onPress: () => void };
-
-const PRODUCTS: { id: string; name: string; price: string; icon: IconName }[] = [
-  { id: '1', name: 'Lubricante', price: '$109', icon: 'bottle-tonic-outline' },
-  { id: '2', name: 'Preservativos x18', price: '$99', icon: 'shield-check-outline' },
-  { id: '3', name: 'Copa menstrual', price: '$249', icon: 'cup-water' },
-];
 
 const PERIOD_DAY = 5; // dato de ejemplo
 
@@ -33,43 +29,56 @@ export default function Home() {
 
   const actions: (Action | false)[] = [
     !isMen && { key: 'edit', label: 'Editar periodo', icon: 'pencil-outline', onPress: () => router.push('/calendario') },
-    { key: 'sym', label: 'Síntomas', icon: 'plus', onPress: () => {} },
-    { key: 'sex', label: 'Sexo', icon: 'heart-outline', onPress: () => {} },
-    { key: 'chk', label: 'Check-in', icon: 'clipboard-check-outline', onPress: () => {} },
+    { key: 'sym', label: 'Síntomas', icon: 'plus', onPress: () => router.push('/sintomas') },
+    { key: 'sex', label: 'Sexo', icon: 'heart-outline', onPress: () => router.push('/sexo') },
+    { key: 'chk', label: 'Check-in', icon: 'clipboard-check-outline', onPress: () => router.push('/checkin') },
   ];
+
+  const products = PRODUCTS.filter((x) => !x.only || x.only === section).slice(0, 4);
 
   return (
     <View style={{ flex: 1, backgroundColor: p.cream }}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+        {/* Encabezado */}
         <View style={[styles.header, { backgroundColor: p.primary, paddingTop: insets.top + 8 }, shadow(p.ink)]}>
           <View style={styles.topRow}>
             <View style={styles.sideL}>
               <Text style={[styles.brand, { color: p.ink }]}>Entre Nos</Text>
             </View>
             <Text style={[styles.month, { color: p.ink }]}>{MONTHS[today.getMonth()].toUpperCase()}</Text>
-              <View style={styles.sideR}>
-                <AvatarButton size={34} />
-              </View>
+            <View style={styles.sideR}>
+              <AvatarButton size={34} />
+            </View>
           </View>
 
           {!isMen && (
             <Pressable style={styles.days} onPress={() => router.push('/calendario')}>
               {days.map((d, i) => (
-                <View key={i} style={[styles.day, i === 1 && styles.dayNear, i === 2 && styles.dayToday]}>
+                <View
+                  key={i}
+                  style={[
+                    styles.day,
+                    i === 1 && { backgroundColor: p.soft },
+                    i === 2 && { backgroundColor: p.cream },
+                  ]}
+                >
                   <Text style={[styles.dayText, { color: p.ink }]}>{d}</Text>
                 </View>
               ))}
             </Pressable>
           )}
 
-          <Text style={[styles.period, { color: p.ink }]}>{`Periodo:\nDía ${PERIOD_DAY}`}</Text>
+          <Text style={[styles.period, { color: p.ink }]}>
+            {'Periodo:\n'}
+            <Text style={{ backgroundColor: p.highlight }}>{` Día ${PERIOD_DAY} `}</Text>
+          </Text>
 
           <View style={styles.actions}>
             {actions
               .filter((a): a is Action => a !== false)
               .map((a) => (
                 <Pressable key={a.key} onPress={a.onPress} style={styles.action}>
-                  <View style={[styles.actionCircle, shadow(p.ink)]}>
+                  <View style={[styles.actionCircle, { backgroundColor: p.cream }, shadow(p.ink)]}>
                     <Icon name={a.icon} size={24} color={p.ink} />
                   </View>
                   <Text style={[styles.actionLabel, { color: p.ink }]}>{a.label}</Text>
@@ -78,20 +87,28 @@ export default function Home() {
           </View>
         </View>
 
-        <Text style={[styles.seeAll, { color: p.ink }]}>Ver todo</Text>
+        {/* Productos */}
+        <Pressable onPress={() => router.push('/tienda')} style={styles.seeAllBtn}>
+          <Text style={[styles.seeAllText, { color: p.ink }]}>Ver todo</Text>
+        </Pressable>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.products}>
-          {PRODUCTS.map((pr) => (
-            <View key={pr.id} style={[styles.product, { backgroundColor: p.soft }, shadow(p.ink)]}>
-              <View style={styles.productImg}>
-                <Icon name={pr.icon} size={56} color={p.accent} />
+          {products.map((pr) => (
+            <Pressable
+              key={pr.id}
+              onPress={() => router.push({ pathname: '/producto', params: { id: pr.id } })}
+              style={[styles.product, { backgroundColor: p.soft }, shadow(p.ink)]}
+            >
+              <View style={[styles.productImg, { backgroundColor: p.cream }]}>
+                <Icon name={pr.icon} size={56} color={p.ink} />
               </View>
               <Text style={[styles.productName, { color: p.ink }]}>{pr.name}</Text>
-              <Text style={[styles.productPrice, { color: p.ink }]}>{pr.price}</Text>
-            </View>
+              <Text style={[styles.productPrice, { color: p.ink, backgroundColor: p.highlight }]}>{pr.price}</Text>
+            </Pressable>
           ))}
         </ScrollView>
 
+        {/* Tips */}
         {!isMen && (
           <View style={[styles.tip, { backgroundColor: p.primary }, shadow(p.ink)]}>
             <View style={styles.tipTitleRow}>
@@ -105,8 +122,8 @@ export default function Home() {
         )}
 
         <View style={styles.healthRow}>
-          <View style={[styles.healthIcon, { backgroundColor: p.accent }]}>
-            <Icon name="heart-pulse" size={22} color="#FFFFFF" />
+          <View style={[styles.healthIcon, { backgroundColor: p.highlight }]}>
+            <Icon name="heart-pulse" size={22} color={p.ink} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[styles.tipTitle, { color: p.ink }]}>Tip de salud</Text>
@@ -129,20 +146,28 @@ const styles = StyleSheet.create({
   month: { fontFamily: BODY_BOLD, fontSize: 13, letterSpacing: 1 },
   days: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 18 },
   day: { width: 46, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  dayNear: { backgroundColor: 'rgba(255,255,255,0.5)' },
-  dayToday: { backgroundColor: '#FFFFFF' },
   dayText: { fontFamily: BODY_BOLD, fontSize: 13 },
-  period: { fontFamily: FONT, fontSize: 22, textAlign: 'center', marginVertical: 22 },
+  period: { fontFamily: FONT, fontSize: 22, textAlign: 'center', marginVertical: 22, lineHeight: 30 },
   actions: { flexDirection: 'row', justifyContent: 'space-around' },
   action: { alignItems: 'center', gap: 6 },
-  actionCircle: { width: 54, height: 54, borderRadius: 27, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
+  actionCircle: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center' },
   actionLabel: { fontFamily: BODY_BOLD, fontSize: 11 },
-  seeAll: { alignSelf: 'flex-end', fontFamily: BODY_BOLD, fontSize: 11, marginRight: 18, marginTop: 14 },
+  seeAllBtn: { alignSelf: 'flex-end', marginRight: 18, marginTop: 14 },
+  seeAllText: { fontFamily: BODY_BOLD, fontSize: 11 },
   products: { paddingHorizontal: 18, paddingVertical: 10, gap: 14 },
   product: { width: 150, borderRadius: 18, padding: 10 },
-  productImg: { height: 110, borderRadius: 14, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
+  productImg: { height: 110, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   productName: { fontFamily: BODY_BOLD, fontSize: 12, marginTop: 10 },
-  productPrice: { fontFamily: BODY, fontSize: 11, marginTop: 4 },
+  productPrice: {
+    alignSelf: 'flex-start',
+    fontFamily: BODY_BOLD,
+    fontSize: 11,
+    marginTop: 6,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    overflow: 'hidden',
+  },
   tip: { marginHorizontal: 18, marginTop: 14, borderRadius: 16, padding: 14 },
   tipTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
   tipTitle: { fontFamily: BODY_BOLD, fontSize: 12 },

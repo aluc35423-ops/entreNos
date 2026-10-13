@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BODY, BODY_BOLD, Palette } from '../theme';
 import { Avatar, shadow } from './ui';
 
-export type Msg = { id: string; mine: boolean; text: string };
+export type Msg = { id: string; mine: boolean; text: string; author?: string };
 
 type Props = {
   palette: Palette;
@@ -30,8 +30,11 @@ function Bubble({ m, p, myAvatar }: { m: Msg; p: Palette; myAvatar?: boolean }) 
   return (
     <View style={[styles.row, m.mine && { flexDirection: 'row-reverse' }]}>
       {showAvatar && <Avatar size={26} />}
-      <View style={[styles.bubble, { backgroundColor: p.primary }, shadow(p.ink)]}>
-        <Text style={[styles.text, { color: p.ink }]}>{m.text}</Text>
+      <View style={styles.bubbleWrap}>
+        {!m.mine && !!m.author && <Text style={[styles.author, { color: p.ink }]}>{m.author}</Text>}
+        <View style={[styles.bubble, { backgroundColor: p.primary }, shadow(p.ink)]}>
+          <Text style={[styles.text, { color: p.ink }]}>{m.text}</Text>
+        </View>
       </View>
     </View>
   );
@@ -105,7 +108,9 @@ export default function Chat({ palette: p, initial, placeholder, myAvatar, quick
 const styles = StyleSheet.create({
   list: { padding: 16, gap: 14 },
   row: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
-  bubble: { maxWidth: '78%', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 10 },
+  bubbleWrap: { maxWidth: '78%' },
+  author: { fontFamily: BODY_BOLD, fontSize: 10, opacity: 0.7, marginBottom: 3, marginLeft: 6 },
+  bubble: { borderRadius: 20, paddingHorizontal: 14, paddingVertical: 10 },
   text: { fontFamily: BODY, fontSize: 13 },
   chips: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingBottom: 8 },
   chip: { borderWidth: 1, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 5, backgroundColor: '#FFFFFF' },

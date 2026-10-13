@@ -6,6 +6,8 @@ import { TitanOne_400Regular } from '@expo-google-fonts/titan-one';
 import * as SplashScreen from 'expo-splash-screen';
 import { Stack } from 'expo-router';
 import { SectionProvider } from '../context/section';
+import { ProfileProvider } from '../context/profile';
+import { LogProvider } from '../context/log';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,16 +27,27 @@ export default function RootLayout() {
 
   return (
     <SectionProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: 'slide_from_right',
-          animationDuration: 350,
-        }}
-      >
-        <Stack.Screen name="index" options={{ animation: 'fade' }} />
-        <Stack.Screen name="(app)" options={{ animation: 'fade', gestureEnabled: false }} />
-      </Stack>
+      <ProfileProvider>
+        <LogProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: 'slide_from_right',
+              animationDuration: 350,
+            }}
+          >
+            <Stack.Screen name="index" options={{ animation: 'fade' }} />
+            <Stack.Screen name="(app)" options={{ animation: 'fade', gestureEnabled: false }} />
+
+            {/* Ventanas emergentes: ellas mismas animan su entrada */}
+            <Stack.Screen name="sintomas" options={{ presentation: 'transparentModal', animation: 'none' }} />
+            <Stack.Screen name="sexo" options={{ presentation: 'transparentModal', animation: 'none' }} />
+            <Stack.Screen name="nota" options={{ presentation: 'transparentModal', animation: 'none' }} />
+            <Stack.Screen name="producto" options={{ presentation: 'transparentModal', animation: 'none' }} />
+            <Stack.Screen name="checkin" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+          </Stack>
+        </LogProvider>
+      </ProfileProvider>
     </SectionProvider>
   );
 }

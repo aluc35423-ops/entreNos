@@ -6,6 +6,7 @@ import { useSection } from '../context/section';
 import { BODY, BODY_BOLD } from '../theme';
 import { Avatar, shadow, TopBar } from '../components/ui';
 import type { Palette } from '../theme';
+import { useProfile } from '../context/profile';
 
 type IconName = keyof typeof Icon.glyphMap;
 
@@ -54,6 +55,8 @@ export default function Ajustes() {
   const [privateMode, setPrivateMode] = useState(true);
   const [biometric, setBiometric] = useState(true);
 
+  const { profile } = useProfile();
+
   return (
     <View style={{ flex: 1, backgroundColor: p.cream }}>
       <TopBar
@@ -69,10 +72,10 @@ export default function Ajustes() {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Perfil */}
-        <Pressable style={[styles.profile, { backgroundColor: p.primary }, shadow(p.ink)]}>
+        <Pressable onPress={() => router.push('/cuenta')} style={[styles.profile, { backgroundColor: p.primary }, shadow(p.ink)]}>
           <Avatar size={46} />
           <View style={{ flex: 1 }}>
-            <Text style={[styles.name, { color: p.ink }]}>Camila Torres</Text>
+            <Text style={[styles.name, { color: p.ink }]}>{profile.name}</Text>
             <Text style={[styles.edit, { color: p.ink }]}>Editar perfil</Text>
           </View>
           <Icon name="arrow-right" size={24} color={p.ink} />
@@ -92,7 +95,7 @@ export default function Ajustes() {
         )}
 
         <SectionTitle p={p}>COMUNIDAD</SectionTitle>
-        <Row p={p} icon="account-outline" label="Perfil en foros" onPress={() => {}} />
+        <Row p={p} icon="account-outline" label="Perfil en foros" onPress={() => router.push('/perfil-foros')} />
         <Row
           p={p}
           icon="chat-outline"
@@ -113,11 +116,11 @@ export default function Ajustes() {
           label="Bloqueo con huella / Face ID"
           toggle={{ value: biometric, onChange: setBiometric }}
         />
-        <Row p={p} icon="clipboard-text-outline" label="Datos de salud" onPress={() => {}} />
+        <Row p={p} icon="clipboard-text-outline" label="Datos de salud" onPress={() => router.push('/datos-salud')} />
 
         <SectionTitle p={p}>CUENTA</SectionTitle>
-        <Row p={p} icon="email-outline" label="Correo y contraseña" onPress={() => {}} />
-        <Row p={p} icon="information-outline" label="Ayuda y soporte" onPress={() => {}} />
+        <Row p={p} icon="email-outline" label="Correo y contraseña" onPress={() => router.push('/cuenta')} />
+        <Row p={p} icon="information-outline" label="Ayuda y soporte" onPress={() => router.push('/ayuda')} />
 
         <Pressable onPress={() => router.replace('/')} style={styles.logout}>
           <Text style={styles.logoutText}>Cerrar sesión</Text>

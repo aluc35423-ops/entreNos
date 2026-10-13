@@ -1,7 +1,9 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { PressableScale as Pressable } from '../components/PressableScale';
 import { useSection } from '../context/section';
+import { useLog } from '../context/log';
 import { MONTHS } from '../utils/dates';
 import { BODY, BODY_BOLD } from '../theme';
 import { shadow, TopBar } from '../components/ui';
@@ -16,6 +18,9 @@ const OVULATION = 15;
 export default function Calendario() {
   const { palette: p } = useSection();
   const router = useRouter();
+  const { get } = useLog();
+  const log = get();
+  const logged = [...log.symptoms, ...log.sex];
 
   const today = new Date();
   const year = today.getFullYear();
@@ -66,6 +71,7 @@ export default function Calendario() {
           </Pressable>
         }
       />
+
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.legend}>
           {legend.map((l) => (
@@ -107,11 +113,26 @@ export default function Calendario() {
             {`${today.getDate()} de ${MONTHS[month]} · Hoy`}
           </Text>
           <Text style={[styles.cardText, { color: p.ink }]}>Fase folicular · Día 3 post-periodo</Text>
+
+          {logged.length > 0 && (
+            <View style={styles.tags}>
+              {logged.map((t) => (
+                <View key={t} style={[styles.tag, { backgroundColor: p.soft }]}>
+                  <Text style={[styles.tagText, { color: p.ink }]}>{t}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {log.notes.map((n, i) => (
+            <Text key={i} style={[styles.noteText, { color: p.ink }]}>{`• ${n}`}</Text>
+          ))}
+
           <View style={styles.cardActions}>
-            <Pressable style={[styles.pill, { backgroundColor: p.button }]}>
+            <Pressable style={[styles.pill, { backgroundColor: p.button }]} onPress={() => router.push('/sintomas')}>
               <Text style={[styles.pillText, { color: p.ink }]}>+ Síntoma</Text>
             </Pressable>
-            <Pressable style={[styles.pill, { backgroundColor: p.button }]}>
+            <Pressable style={[styles.pill, { backgroundColor: p.button }]} onPress={() => router.push('/nota')}>
               <Text style={[styles.pillText, { color: p.ink }]}>+ Nota</Text>
             </Pressable>
           </View>
@@ -136,6 +157,10 @@ const styles = StyleSheet.create({
   card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginTop: 20 },
   cardTitle: { fontFamily: BODY_BOLD, fontSize: 14 },
   cardText: { fontFamily: BODY, fontSize: 13, marginTop: 4 },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 12 },
+  tag: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
+  tagText: { fontFamily: BODY_BOLD, fontSize: 11 },
+  noteText: { fontFamily: BODY, fontSize: 12, marginTop: 8, lineHeight: 17 },
   cardActions: { flexDirection: 'row', gap: 10, marginTop: 14 },
   pill: { borderRadius: 16, paddingHorizontal: 16, paddingVertical: 8 },
   pillText: { fontFamily: BODY_BOLD, fontSize: 12 },
